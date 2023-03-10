@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@+id/navigation_bt">
+
+    <fragment
+        android:id="@+id/navigation_bt"
+        android:name="com.chapp.ui.bt.BluetoothFragment"
+        android:label="@string/bluetooth"
+        tools:layout="@layout/fragment_bluetooth" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_chat"
+        android:name="com.chapp.ui.chat.ChatFragment"
+        android:label="@string/Chat"
+        tools:layout="@layout/fragment_chat" >
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/navigation_log_file"
+        android:name="com.chapp.ui.log_file.LogFileFragment"
+        android:label="@string/log_file"
+        tools:layout="@layout/fragment_log_file" />
+
+</navigation>
