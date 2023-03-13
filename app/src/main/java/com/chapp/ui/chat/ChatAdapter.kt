@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
 import com.chapp.R
+import com.chapp.ui.chat.Message
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -25,22 +26,22 @@ class ChatAdapter(val chatData: List<Message>, val context: Context) : RecyclerV
         when(holder.itemViewType){
 
             SENT -> {
-                val sHolder: SentHolder = holder as SentHolder
-                sHolder.user.text = chatData[position].user
-                sHolder.sentTV.text = chatData[position].message
+                val holder: SentHolder = holder as SentHolder
+                holder.user.text = chatData[position].user
+                holder.sentTV.text = chatData[position].message
                 val timeMilliSeconds = chatData[position].time
-                val resultDate = Date(timeMilliSeconds)
+                val resultdate = Date(timeMilliSeconds)
 
-                sHolder.timeStamp.text = df.format(resultDate)
+                holder.timeStamp.text = df.format(resultdate)
 
             }
             RECEIVED -> {
-                val rHolder: ReceivedHolder = holder as ReceivedHolder
-                rHolder.user_other.text = chatData[position].user
-                rHolder.receivedTV.text = chatData[position].message
+                val holder: ReceivedHolder = holder as ReceivedHolder
+                holder.user_other.text = chatData[position].user
+                holder.receivedTV.text = chatData[position].message
                 val timeMilliSeconds = chatData[position].time
-                val resultDate = Date(timeMilliSeconds)
-                rHolder.timeStamp.text = df.format(resultDate)
+                val resultdate = Date(timeMilliSeconds)
+                holder.timeStamp.text = df.format(resultdate)
             }
 
         }

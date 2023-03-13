@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -34,8 +35,10 @@ import com.chapp.services.ConnectionManager.teardownConnection
 import com.chapp.ui.chat.ChatFragment
 import com.chapp.ui.chat.Constants
 import com.chapp.ui.chat.Message
+import com.chapp.ui.chat.MessageDatabase
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -54,6 +57,8 @@ class MainActivity : AppCompatActivity(),
             "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
 
     }
+
+    private val messageDatabase by lazy { MessageDatabase.getDatabase(this).messageDao() }
     var navController: NavController? = null
     lateinit var chatFragment: ChatFragment
     private lateinit var binding: ActivityMainBinding
@@ -277,20 +282,20 @@ class MainActivity : AppCompatActivity(),
 
 
     private val connectionEventListener by lazy {
+
         ConnectionEventListener().apply {
 
-            onCharacteristicChanged = { device, char, value ->
-                val writeMessage =value.toString(Charsets.UTF_8)
-                val milliSecondsTime = System.currentTimeMillis()
+            onCharacteristicChanged = { device, char ->
+                Log.i("Received", "$device:${AllGattCharacteristics.lookup(char.uuid)}:${char.value.toString(Charsets.UTF_8)}")
+                val message = Message(System.currentTimeMillis(),
+                    device.name,
+                    char.value.toString(Charsets.UTF_8),
+                    Constants.MESSAGE_TYPE_RECEIVED)
                 runOnUiThread {
-                    chatFragment.communicate(
-                        Message(
-                            device.name,
-                            writeMessage,
-                            milliSecondsTime,
-                            Constants.MESSAGE_TYPE_RECEIVED
-                        )
-                    )
+                    chatFragment.communicate(message)
+                    lifecycleScope.launch{
+                        messageDatabase.addMessage(message)
+                    }
                 }
             }
 
@@ -376,18 +381,6 @@ class MainActivity : AppCompatActivity(),
                 || super.onSupportNavigateUp()
     }
 
-    override fun onPause() {
-        super.onPause()
-        writeLog(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        writeLog(this)
-    }
-
-
-
     override fun onCommunication(message: String) {
         sendMessage(message)
     }
@@ -413,27 +406,23 @@ class MainActivity : AppCompatActivity(),
                             )
                         }
                 }
-            val writeMessage = String(send)
-            val milliSecondsTime = System.currentTimeMillis()
-            chatFragment.communicate(Message("Me",writeMessage,milliSecondsTime, Constants.MESSAGE_TYPE_SENT))
+
+            val message = Message(
+                System.currentTimeMillis(),
+                "Me",
+                String(send),
+                Constants.MESSAGE_TYPE_SENT
+            )
+            chatFragment.communicate(message)
+            lifecycleScope.launch{
+                messageDatabase.addMessage(message)
             }
+            }
+
             // Reset out string buffer to zero and clear the edit text field
             //mOutStringBuffer.setLength(0)
             //mOutEditText.setText(mOutStringBuffer)
         }
-    fun writeLog(context: Context) {
-        try {
-            val path = File(context.filesDir, "log_files")
-            if (!path.exists()) {
-                path.mkdir()
-            }
 
-            val fileName = "Log ${System.currentTimeMillis()}.txt"
-
-            Runtime.getRuntime().exec("logcat -v time -f $fileName")
-        } catch (_: IOException) {
-
-        }
-    }
     }
 

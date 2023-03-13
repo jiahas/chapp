@@ -101,7 +101,7 @@ class ChatFragment : Fragment() , View.OnClickListener {
     fun communicate(message: Message){
         messageList.add(message)
         if(activity != null) {
-            chatAdapter = ChatAdapter(messageList.reversed(), activity as MainActivity)
+            chatAdapter = ChatAdapter(messageList.reversed(), requireContext())
             recyclerviewChat.adapter = chatAdapter
             recyclerviewChat.scrollToPosition(0)
         }
