@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.chapp.R
-import com.chapp.ui.chat.Message
 import java.text.SimpleDateFormat
+import com.chapp.R
 import java.util.*
 
 /**
@@ -26,20 +25,22 @@ class ChatAdapter(val chatData: List<Message>, val context: Context) : RecyclerV
         when(holder.itemViewType){
 
             SENT -> {
-                val holder: SentHolder = holder as SentHolder
-                holder.sentTV.text = chatData[position].message
+                val sHolder: SentHolder = holder as SentHolder
+                sHolder.user.text = chatData[position].user
+                sHolder.sentTV.text = chatData[position].message
                 val timeMilliSeconds = chatData[position].time
-                val resultdate = Date(timeMilliSeconds)
+                val resultDate = Date(timeMilliSeconds)
 
-                holder.timeStamp.text = df.format(resultdate)
+                sHolder.timeStamp.text = df.format(resultDate)
 
             }
             RECEIVED -> {
-                val holder: ReceivedHolder = holder as ReceivedHolder
-                holder.receivedTV.text = chatData[position].message
+                val rHolder: ReceivedHolder = holder as ReceivedHolder
+                rHolder.user_other.text = chatData[position].user
+                rHolder.receivedTV.text = chatData[position].message
                 val timeMilliSeconds = chatData[position].time
-                val resultdate = Date(timeMilliSeconds)
-                holder.timeStamp.text = df.format(resultdate)
+                val resultDate = Date(timeMilliSeconds)
+                rHolder.timeStamp.text = df.format(resultDate)
             }
 
         }
@@ -78,11 +79,13 @@ class ChatAdapter(val chatData: List<Message>, val context: Context) : RecyclerV
     }
 
     inner class SentHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+        var user = itemView.findViewById<TextView>(R.id.text_gchat_user)
         var sentTV = itemView.findViewById<TextView>(R.id.sentMessage)
         var timeStamp = itemView.findViewById<TextView>(R.id.timeStamp)
     }
 
     inner class ReceivedHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var user_other = itemView.findViewById<TextView>(R.id.text_gchat_user_other)
         var receivedTV = itemView.findViewById<TextView>(R.id.receivedMessage)
         var timeStamp = itemView.findViewById<TextView>(R.id.timeStamp)
     }

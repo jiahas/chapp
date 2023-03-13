@@ -2,9 +2,7 @@ package com.chapp
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.AlertDialog
-import android.app.Application
+import android.app.*
 import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
@@ -21,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -37,6 +36,8 @@ import com.chapp.ui.chat.Constants
 import com.chapp.ui.chat.Message
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.io.File
+import java.io.IOException
 import java.util.*
 
 
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(),
             "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
 
     }
+    var navController: NavController? = null
     lateinit var chatFragment: ChatFragment
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -116,17 +118,17 @@ class MainActivity : AppCompatActivity(),
         setSupportActionBar(binding.toolbar)
         val navView: BottomNavigationView = binding.navView
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
         ConnectionManager.application = this.applicationContext as Application
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        appBarConfiguration = AppBarConfiguration(navController!!.graph)
 
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_bt, R.id.navigation_chat, R.id.navigation_log_file
             )
         )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        setupActionBarWithNavController(navController!!, appBarConfiguration)
+        navView.setupWithNavController(navController!!)
         registerListener(connectionEventListener)
     }
 
@@ -277,20 +279,19 @@ class MainActivity : AppCompatActivity(),
     private val connectionEventListener by lazy {
         ConnectionEventListener().apply {
 
-            onCharacteristicChanged = { gatt, char ->
-                Log.i("Received", "$gatt:${AllGattCharacteristics.lookup(char.uuid)}:${char.value.toString(Charsets.UTF_8)}")
-                val writeMessage = char.value.toString(Charsets.UTF_8)
+            onCharacteristicChanged = { device, char, value ->
+                val writeMessage =value.toString(Charsets.UTF_8)
                 val milliSecondsTime = System.currentTimeMillis()
                 runOnUiThread {
                     chatFragment.communicate(
                         Message(
+                            device.name,
                             writeMessage,
                             milliSecondsTime,
                             Constants.MESSAGE_TYPE_RECEIVED
                         )
                     )
                 }
-
             }
 
             onConnectionSetupComplete = {
@@ -308,8 +309,8 @@ class MainActivity : AppCompatActivity(),
      * Extension functions
      *******************************************/
 
-    private fun ByteArray.toHexString(): String =
-        joinToString(separator = " ", prefix = "0x") { String.format("%02X", it) }
+//    private fun ByteArray.toHexString(): String =
+//        joinToString(separator = " ", prefix = "0x") { String.format("%02X", it) }
 
     private fun Context.hasPermission(permissionType: String): Boolean {
         return ContextCompat.checkSelfPermission(this, permissionType) ==
@@ -375,6 +376,16 @@ class MainActivity : AppCompatActivity(),
                 || super.onSupportNavigateUp()
     }
 
+    override fun onPause() {
+        super.onPause()
+        writeLog(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        writeLog(this)
+    }
+
 
 
     override fun onCommunication(message: String) {
@@ -387,7 +398,6 @@ class MainActivity : AppCompatActivity(),
         if (message.isNotEmpty()) {
             // Get the message bytes and tell the BluetoothChatService to write
             val send = message.toByteArray(Charsets.UTF_8)
-            Log.i("Message Sent","${send.toHexString()} ${send.toString(Charsets.UTF_8)} ${send.size}")
             deviceGattMap.forEach { (device, gatt) ->
                     gatt.findCharacteristic(UUID.fromString("49535343-8841-43f4-a8d4-ecbe34729bb3"))
                         ?.let {
@@ -405,11 +415,25 @@ class MainActivity : AppCompatActivity(),
                 }
             val writeMessage = String(send)
             val milliSecondsTime = System.currentTimeMillis()
-            chatFragment.communicate(Message(writeMessage,milliSecondsTime, Constants.MESSAGE_TYPE_SENT))
+            chatFragment.communicate(Message("Me",writeMessage,milliSecondsTime, Constants.MESSAGE_TYPE_SENT))
             }
             // Reset out string buffer to zero and clear the edit text field
             //mOutStringBuffer.setLength(0)
             //mOutEditText.setText(mOutStringBuffer)
         }
+    fun writeLog(context: Context) {
+        try {
+            val path = File(context.filesDir, "log_files")
+            if (!path.exists()) {
+                path.mkdir()
+            }
+
+            val fileName = "Log ${System.currentTimeMillis()}.txt"
+
+            Runtime.getRuntime().exec("logcat -v time -f $fileName")
+        } catch (_: IOException) {
+
+        }
+    }
     }
 

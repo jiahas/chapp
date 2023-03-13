@@ -18,4 +18,6 @@
     <string name="last_message">Last message</string>
     <string name="Input_Channel_Name">Input Channel Name</string>
     <string name="Chat">Chat</string>
+    <string name="me">Me</string>
+    <string name="sender">Sender</string>
 </resources>

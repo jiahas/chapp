@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.text.Editable
-import android.util.Log
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
@@ -30,7 +29,6 @@ class ChatFragment : Fragment() , View.OnClickListener {
     private var chatAdapter: ChatAdapter? = null
     private lateinit var recyclerviewChat: RecyclerView
     private val messageList = arrayListOf<Message>()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -100,11 +98,12 @@ class ChatFragment : Fragment() , View.OnClickListener {
         sendListener = context as CommunicationListener
      }
 
-
     fun communicate(message: Message){
         messageList.add(message)
-        chatAdapter = ChatAdapter(messageList.reversed(),requireActivity())
-        recyclerviewChat.adapter = chatAdapter
-        recyclerviewChat.scrollToPosition(0)
+        if(activity != null) {
+            chatAdapter = ChatAdapter(messageList.reversed(), activity as MainActivity)
+            recyclerviewChat.adapter = chatAdapter
+            recyclerviewChat.scrollToPosition(0)
+        }
     }
 }

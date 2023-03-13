@@ -8,7 +8,15 @@
     android:layout_marginStart="@dimen/chat_bubble_left_margin"
     android:layout_marginEnd="@dimen/chat_bubble_right_margin"
     android:layout_marginTop="@dimen/chat_bubble_top_margin">
-
+    <TextView
+        android:id="@+id/text_gchat_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/me"
+        android:textSize="16sp"
+        android:layout_alignParentEnd="true"
+        />
     <TextView
         android:id="@+id/sentMessage"
         android:layout_width="wrap_content"
@@ -18,6 +26,7 @@
         android:textColor="@color/colorPrimaryText"
         android:text="@string/test_message"
         android:background="@drawable/rounded_chat_sent_background"
+        android:layout_below="@id/text_gchat_user"
         />
 
     <TextView
