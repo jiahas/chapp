@@ -438,11 +438,12 @@ object ConnectionManager {
 
         override fun onCharacteristicChanged(
             gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
         ) {
             with(characteristic) {
                 Log.i("Gatt Callback","Characteristic ${AllGattCharacteristics.lookup(uuid)} changed | value: ${value.toHexString()}")
-                listeners.forEach { it.get()?.onCharacteristicChanged?.invoke(gatt.device, this) }
+                listeners.forEach { it.get()?.onCharacteristicChanged?.invoke(gatt.device, this, value) }
             }
         }
 
