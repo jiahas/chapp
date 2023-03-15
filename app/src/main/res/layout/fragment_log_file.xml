@@ -1,22 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.log_file.LogFileFragment">
+    tools:context=".ui.log_file.LogFileFragment"
+    android:autofillHints="Select date range"
+    >
 
-    <TextView
+    <RelativeLayout
+        android:background="@android:drawable/dialog_holo_light_frame"
+        android:id="@+id/LayoutContainer1"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="top"
+        android:weightSum="5">
+
+        <Button
+            android:id="@+id/startDate"
+            android:text="@string/start_date"
+            android:width="150dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="30dp"
+            />
+        <Button
+            android:id="@+id/endDate"
+            android:text="@string/end_date"
+            android:width="150dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="30dp"
+            />
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        tools:listitem="@layout/sent_layout"
+        tools:itemCount="10"
+        android:id="@+id/logRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/LayoutContainer1"
+        android:layout_above="@id/LayoutContainer2"
+        />
+
+    <RelativeLayout
+        android:id="@+id/LayoutContainer2"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@android:drawable/dialog_holo_light_frame"
+        android:weightSum="5">
+
+        <Button
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:width="150dp"
+            android:layout_alignParentStart="true"
+            android:text="@string/refresh" />
+
+        <Button
+            android:id="@+id/export"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:layout_alignParentEnd="true"
+            android:width="150dp"
+            android:text="@string/Export_Data" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

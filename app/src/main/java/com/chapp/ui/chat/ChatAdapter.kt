@@ -15,10 +15,10 @@ import java.util.*
  * Created by ramankit on 25/7/17.
  */
 
-class ChatAdapter(val chatData: List<Message>, val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatAdapter(private val chatData: List<Message>, val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val SENT = 0
-    val RECEIVED = 1
+    private val SENT = 0
+    private val RECEIVED = 1
     var df: SimpleDateFormat = SimpleDateFormat("hh:mm a",Locale.getDefault())
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -40,8 +40,8 @@ class ChatAdapter(val chatData: List<Message>, val context: Context) : RecyclerV
                 holder.user_other.text = chatData[position].user
                 holder.receivedTV.text = chatData[position].message
                 val timeMilliSeconds = chatData[position].time
-                val resultdate = Date(timeMilliSeconds)
-                holder.timeStamp.text = df.format(resultdate)
+                val resultDate = Date(timeMilliSeconds)
+                holder.timeStamp.text = df.format(resultDate)
             }
 
         }

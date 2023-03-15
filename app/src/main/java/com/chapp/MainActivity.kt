@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-    private val messageDatabase by lazy { MessageDatabase.getDatabase(this).messageDao() }
+    val messageDatabase by lazy { MessageDatabase.getDatabase(this).messageDao() }
     var navController: NavController? = null
     lateinit var chatFragment: ChatFragment
     private lateinit var binding: ActivityMainBinding
