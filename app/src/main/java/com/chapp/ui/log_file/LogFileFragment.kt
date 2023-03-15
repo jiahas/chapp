@@ -1,26 +1,18 @@
 package com.chapp.ui.log_file
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.util.copy
 import com.chapp.MainActivity
 import com.chapp.R
 import com.chapp.databinding.FragmentLogFileBinding
@@ -28,11 +20,13 @@ import com.chapp.ui.chat.ChatAdapter
 import com.chapp.ui.chat.Message
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.sql.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class LogFileFragment : Fragment() {
@@ -80,7 +74,24 @@ class LogFileFragment : Fragment() {
         }
 
         exportButton.setOnClickListener{
-            lifecycleScope
+
+            if (messageList.isNotEmpty()){
+                val path = context?.getExternalFilesDir(null)
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                val current = LocalDateTime.now().format(formatter)
+                val letDirectory = File(path,"Log")
+                if (!letDirectory.exists()){
+                    letDirectory.mkdirs()
+                }
+                Log.i("path", letDirectory.toString())
+                val file = File(letDirectory, "Chapp_Log_File_$current.csv")
+                file.createNewFile()
+                FileOutputStream(file).apply { writeCsv(messageList) }
+            } else {
+                Snackbar.make(it,"Set log period to export data", 5).show()
+            }
+
+
         }
 
         return root
@@ -89,6 +100,17 @@ class LogFileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun OutputStream.writeCsv(messages: List<Message>) {
+        val writer = bufferedWriter()
+        writer.write(""""Date", "Device", "Message"""")
+        writer.newLine()
+        messages.forEach {
+            writer.write("${Date(it.time)}, ${it.user},\"${it.message}\"")
+            writer.newLine()
+        }
+        writer.flush()
     }
 
     private fun pickDateTime(view: Button, hourDate: HourDate) {
