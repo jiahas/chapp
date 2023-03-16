@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.registerReceiver
 import androidx.recyclerview.widget.RecyclerView
 import com.chapp.services.ConnectionManager
 
@@ -74,11 +73,11 @@ class ScanResultAdapter (
         button.isEnabled = true
         button.text=state
         button.setTextColor(ContextCompat.getColor(context, R.color.white))
-        button.setBackgroundColor(ContextCompat.getColor(context, R.color.purple_500))
+        button.setBackgroundColor(ContextCompat.getColor(context, R.color.stone_red))
     }
 
     inner class ViewHolder(
-        private val view: View,
+        view: View,
         private val onClickListener: ((device: ScanResult) -> Unit)
     ) : RecyclerView.ViewHolder(view) {
 
@@ -88,6 +87,7 @@ class ScanResultAdapter (
         val rssi = itemView.findViewById<TextView>(R.id.signal_strength)
         val disconnect = itemView.findViewById<TextView>(R.id.disconnect)
 
+        @SuppressLint("SetTextI18n")
         fun bind(result: ScanResult) {
 
             device.text = result.device.name ?: "Unnamed"

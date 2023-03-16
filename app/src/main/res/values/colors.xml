@@ -8,9 +8,13 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="greyish">#857D7D</color>
-    <color name="blue">#00CCFF</color>
+    <color name="blue_light">#03A9F4</color>
+    <color name="blue">#105AD5</color>
     <color name="colorAccent">#673AB7</color>
     <color name="colorPrimaryText">#212121</color>
     <color name="transparent">#00ffffff</color>
     <color name="grey">#BDBDBD</color>
+    <color name="stone_red">#cf152d</color>
+    <color name="stone_red_2">#CF0F27</color>
+    <color name="bluetooth">#0a3d91</color>
 </resources>
