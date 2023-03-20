@@ -289,7 +289,7 @@ class MainActivity : AppCompatActivity(),
                 Log.i("Received", "$device:${AllGattCharacteristics.lookup(char.uuid)}:${char.value.toString(Charsets.UTF_8)}")
                 val message = Message(System.currentTimeMillis(),
                     device.name,
-                    char.value.toString(Charsets.UTF_8),
+                    char.value.toString(Charsets.UTF_8).replace("\n","").replace("\r",""),
                     Constants.MESSAGE_TYPE_RECEIVED)
                 runOnUiThread {
                     chatFragment.communicate(message)

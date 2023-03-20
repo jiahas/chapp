@@ -1,5 +1,6 @@
 package com.chapp.ui.chat
 
+import android.database.Cursor
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 

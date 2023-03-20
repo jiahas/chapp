@@ -1,5 +1,6 @@
 package com.chapp.ui.log_file
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -18,6 +19,7 @@ import com.chapp.R
 import com.chapp.databinding.FragmentLogFileBinding
 import com.chapp.ui.chat.ChatAdapter
 import com.chapp.ui.chat.Message
+import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.sql.Date
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -75,24 +78,20 @@ class LogFileFragment : Fragment() {
 
         exportButton.setOnClickListener{
 
-            if (messageList.isNotEmpty()){
-                val path = context?.getExternalFilesDir(null)
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                val current = LocalDateTime.now().format(formatter)
-                val letDirectory = File(path,"Log")
-                if (!letDirectory.exists()){
-                    letDirectory.mkdirs()
+                start.hourDate?.let { it1 ->
+                    end.hourDate?.let { it2 ->
+                        showLog(mainActivity.messageDatabase.getMessages(it1, it2))
+                    } ?: run{
+                        Snackbar.make(it,"Set ending date", 5).show()
+                    }
+                } ?: run {
+                    Snackbar.make(it,"Set starting date", 5).show()
                 }
-                Log.i("path", letDirectory.toString())
-                val file = File(letDirectory, "Chapp_Log_File_$current.csv")
-                file.createNewFile()
-                FileOutputStream(file).apply { writeCsv(messageList) }
-            } else {
-                Snackbar.make(it,"Set log period to export data", 5).show()
+                val csvFile = context?.let { it1 -> createFile(it1) }
+                if (csvFile != null) {
+                    writeCsv(csvFile, messageList)
+                }
             }
-
-
-        }
 
         return root
     }
@@ -102,15 +101,40 @@ class LogFileFragment : Fragment() {
         _binding = null
     }
 
-    private fun OutputStream.writeCsv(messages: List<Message>) {
-        val writer = bufferedWriter()
-        writer.write(""""Date", "Device", "Message"""")
-        writer.newLine()
-        messages.forEach {
-            writer.write("${Date(it.time)}, ${it.user},\"${it.message}\"")
-            writer.newLine()
+    @SuppressLint("SimpleDateFormat")
+    private fun formatDate(milliSeconds: Long, dateFormat: String): String {
+        val formatter = SimpleDateFormat(dateFormat)
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = milliSeconds
+        return formatter.format(calendar.time)
+    }
+
+    private fun createFile(context: Context): File? {
+        val path = context.getExternalFilesDir(null)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm")
+        val current = LocalDateTime.now().format(formatter)
+        val letDirectory = File(path,"Log")
+        if (!letDirectory.exists()){
+            letDirectory.mkdirs()
         }
-        writer.flush()
+        Log.i("path", letDirectory.toString())
+        val file = File(letDirectory, "Chapp_Log_File_$current.csv")
+        file.createNewFile()
+        return if (file.exists()){
+            file
+        } else {
+            null
+        }
+    }
+
+    private fun writeCsv(csvFile: File ,messages: List<Message>) {
+        csvWriter().open(csvFile, append = false){
+            writeRow(listOf("Date", "Device", "Message"))
+            messages.forEach { it ->
+                writeRow(listOf(formatDate(it.time, "dd-MM-yyyy HH:MM:ss.SSSS"), it.user, it.message.replace("\n","").replace("\r","")))
+            }
+        }
+        view?.let { Snackbar.make(it,"Finished", 5).show() }
     }
 
     private fun pickDateTime(view: Button, hourDate: HourDate) {
@@ -141,7 +165,7 @@ class LogFileFragment : Fragment() {
         lifecycleScope.launch {
                     flow.collect { value ->
                         messageList = value
-                        logAdapter = ChatAdapter(messageList,requireContext())
+                        logAdapter = ChatAdapter(messageList.reversed(),requireContext())
                         recyclerviewLog.adapter = logAdapter
                         recyclerviewLog.scrollToPosition(0)
                     }
