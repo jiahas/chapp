@@ -15,11 +15,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-    </style><![CDATA[
-    style>
-
-    ]]>
-
+    </style>
     <style name="Theme.Chapp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.Chapp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

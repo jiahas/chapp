@@ -4,39 +4,43 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.database.Cursor
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chapp.MainActivity
 import com.chapp.R
 import com.chapp.databinding.FragmentLogFileBinding
-import com.chapp.ui.chat.ChatAdapter
+import com.chapp.ui.chat.LogAdapter
 import com.chapp.ui.chat.Message
+import com.chapp.ui.chat.MessageDao
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class LogFileFragment : Fragment() {
 
-    private var logAdapter: ChatAdapter? = null
+class LogFileFragment : Fragment(){
+
+    private var logAdapter: LogAdapter? = null
     private lateinit var recyclerviewLog: RecyclerView
-    private var messageList = listOf<Message>()
     private var _binding: FragmentLogFileBinding? = null
     private val binding get() = _binding!!
     override fun onCreateView(
@@ -67,7 +71,7 @@ class LogFileFragment : Fragment() {
         refreshButton.setOnClickListener {
             start.hourDate?.let {it1 ->
                 end.hourDate?.let {it2 ->
-                    showLog(mainActivity.messageDatabase.getMessages(it1, it2))
+                    show(observePagingSource(mainActivity.messageDatabase,it1, it2))
                 } ?: run{
                     Snackbar.make(it,"Set ending date", 5).show()
                 }
@@ -80,17 +84,18 @@ class LogFileFragment : Fragment() {
 
                 start.hourDate?.let { it1 ->
                     end.hourDate?.let { it2 ->
-                        showLog(mainActivity.messageDatabase.getMessages(it1, it2))
+
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            exportLog(mainActivity.messageDatabase.exportLog(it1, it2))
+                        }
+
                     } ?: run{
                         Snackbar.make(it,"Set ending date", 5).show()
                     }
                 } ?: run {
                     Snackbar.make(it,"Set starting date", 5).show()
                 }
-                val csvFile = context?.let { it1 -> createFile(it1) }
-                if (csvFile != null) {
-                    writeCsv(csvFile, messageList)
-                }
+
             }
 
         return root
@@ -108,7 +113,12 @@ class LogFileFragment : Fragment() {
         calendar.timeInMillis = milliSeconds
         return formatter.format(calendar.time)
     }
-
+    private fun observePagingSource(dao : MessageDao, start: Long, end: Long): Flow<PagingData<Message>> {
+        return Pager(
+            config = PagingConfig(pageSize = 50, initialLoadSize = 50),
+            pagingSourceFactory = { dao.getMessages(start,end) }
+        ).flow
+    }
     private fun createFile(context: Context): File? {
         val path = context.getExternalFilesDir(null)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm")
@@ -125,16 +135,6 @@ class LogFileFragment : Fragment() {
         } else {
             null
         }
-    }
-
-    private fun writeCsv(csvFile: File ,messages: List<Message>) {
-        csvWriter().open(csvFile, append = false){
-            writeRow(listOf("Date", "Device", "Message"))
-            messages.forEach { it ->
-                writeRow(listOf(formatDate(it.time, "dd-MM-yyyy HH:MM:ss.SSSS"), it.user, it.message.replace("\n","").replace("\r","")))
-            }
-        }
-        view?.let { Snackbar.make(it,"Finished", 5).show() }
     }
 
     private fun pickDateTime(view: Button, hourDate: HourDate) {
@@ -161,16 +161,42 @@ class LogFileFragment : Fragment() {
         }, startYear, startMonth, startDay).show()
     }
 
-    private fun showLog(flow: Flow<List<Message>>){
+    private fun show(page: Flow<PagingData<Message>>){
         lifecycleScope.launch {
-                    flow.collect { value ->
-                        messageList = value
-                        logAdapter = ChatAdapter(messageList.reversed(),requireContext())
+                    page.collect { value ->
+                        logAdapter?.submitData(value)
                         recyclerviewLog.adapter = logAdapter
                         recyclerviewLog.scrollToPosition(0)
                     }
                 }
             }
+
+
+    private fun exportLog(crs: Cursor) {
+        val csvFile = context?.let { it1 -> createFile(it1) }
+        if (csvFile != null) {
+            csvWriter().open(csvFile, append = false) {
+                writeRow(listOf("Date", "Device", "Message"))
+                        if (crs.moveToFirst()) {
+                            while (!crs.isAfterLast) {
+                                writeRow(
+                                    listOf(
+                                        formatDate(
+                                            crs.getLong(0),
+                                            "dd-MM-yyyy HH:MM:ss.SSSS"
+                                        ),
+                                        crs.getString(1),
+                                        crs.getString(2).replace("\n", "").replace("\r", "")
+                                    )
+                                )
+                                crs.moveToNext()
+                            }
+                            view?.let { Snackbar.make(it,"Finished", 1000).show() }
+                        crs.close()
+                        }
+                }
+            }
+    }
 
 
     private fun initViews(mView: View, context: Context) {
@@ -179,7 +205,7 @@ class LogFileFragment : Fragment() {
         val llm = LinearLayoutManager(context)
         llm.reverseLayout = true
         recyclerviewLog.layoutManager = llm
-        logAdapter = ChatAdapter(messageList, context)
+        logAdapter = LogAdapter(context)
         recyclerviewLog.adapter = logAdapter
 
     }

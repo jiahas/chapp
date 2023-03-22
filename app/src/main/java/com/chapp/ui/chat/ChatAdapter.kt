@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chapp.R
-import com.chapp.ui.chat.Message
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,7 +18,7 @@ class ChatAdapter(private val chatData: List<Message>, val context: Context) : R
 
     private val SENT = 0
     private val RECEIVED = 1
-    var df: SimpleDateFormat = SimpleDateFormat("hh:mm a",Locale.getDefault())
+    var df: SimpleDateFormat = SimpleDateFormat("dd/mm/yyyy hh:mm a",Locale.getDefault())
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
