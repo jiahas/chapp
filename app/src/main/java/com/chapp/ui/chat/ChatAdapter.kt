@@ -18,7 +18,7 @@ class ChatAdapter(private val chatData: List<Message>, val context: Context) : R
 
     private val SENT = 0
     private val RECEIVED = 1
-    var df: SimpleDateFormat = SimpleDateFormat("dd/mm/yyyy hh:mm a",Locale.getDefault())
+    var df: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a",Locale.getDefault())
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
