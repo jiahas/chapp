@@ -9,7 +9,6 @@
     android:focusable="true"
     tools:context=".ui.chat.ChatFragment">
 
-
     <RelativeLayout
         android:id="@+id/chatLayoutContainer"
         android:layout_width="match_parent"

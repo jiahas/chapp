@@ -14,6 +14,7 @@ import android.os.*
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -38,9 +39,8 @@ import com.chapp.ui.chat.Message
 import com.chapp.ui.chat.MessageDatabase
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.IOException
 import java.util.*
 
 
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity(),
             "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
 
     }
-
+    var setLog: Boolean = false
     val messageDatabase by lazy { MessageDatabase.getDatabase(this).messageDao() }
     var navController: NavController? = null
     lateinit var chatFragment: ChatFragment
@@ -139,8 +139,31 @@ class MainActivity : AppCompatActivity(),
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.bottom_nav_menu, menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_log).isChecked = setLog
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_log -> if (item.isChecked) {
+                item.isChecked = false
+                setLog = item.isChecked
+                true
+            } else {
+                item.isChecked = true
+                setLog = item.isChecked
+                true
+            }
+            R.id.action_about -> {
+                Snackbar.make(findViewById(R.id.container),"Developed by Chen Jiahao for Bluetooth Test Purposes", 2000 ).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private val startForResult = registerForActivityResult(
@@ -293,8 +316,10 @@ class MainActivity : AppCompatActivity(),
                     Constants.MESSAGE_TYPE_RECEIVED)
                 runOnUiThread {
                     chatFragment.communicate(message)
-                    lifecycleScope.launch{
-                        messageDatabase.addMessage(message)
+                    if (setLog == true){
+                        lifecycleScope.launch{
+                            messageDatabase.addMessage(message)
+                        }
                     }
                 }
             }
@@ -413,10 +438,13 @@ class MainActivity : AppCompatActivity(),
                 String(send),
                 Constants.MESSAGE_TYPE_SENT
             )
-            chatFragment.communicate(message)
-            lifecycleScope.launch{
-                messageDatabase.addMessage(message)
+            if (setLog == true){
+                lifecycleScope.launch{
+                    messageDatabase.addMessage(message)
+                }
             }
+            chatFragment.communicate(message)
+
             }
 
             // Reset out string buffer to zero and clear the edit text field

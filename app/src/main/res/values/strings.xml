@@ -15,4 +15,6 @@
     <string name="end_date">End Date</string>
     <string name="Export_Data">Export Data</string>
     <string name="refresh">Refresh</string>
+    <string name="action_about">About</string>
+    <string name="enable_log">Enable Log</string>
 </resources>
