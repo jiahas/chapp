@@ -22,7 +22,8 @@ class LogAdapter(val context: Context)  : PagingDataAdapter<Message, RecyclerVie
 
     private val SENT = 0
     private val RECEIVED = 1
-    var df: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a",Locale.getDefault())
+
+    var df: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss a",Locale.getDefault())
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 

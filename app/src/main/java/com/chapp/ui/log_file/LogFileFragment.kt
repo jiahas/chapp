@@ -183,7 +183,7 @@ class LogFileFragment : Fragment(){
                                     listOf(
                                         formatDate(
                                             crs.getLong(0),
-                                            "dd-MM-yyyy HH:MM:ss.SSSS"
+                                            "dd-MM-yyyy HH:mm:ss.SSSS"
                                         ),
                                         crs.getString(1),
                                         crs.getString(2).replace("\n", "").replace("\r", "")
