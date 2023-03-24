@@ -13,7 +13,7 @@ interface MessageDao {
     @Query("SELECT * FROM Messages WHERE Date BETWEEN (:start) AND (:end) ORDER BY Date DESC")
     fun getMessages(start: Long?, end: Long?): PagingSource<Int, Message>
 
-    @Query("SELECT * FROM Messages WHERE Date BETWEEN (:start) AND (:end) ORDER BY Date DESC")
+    @Query("SELECT * FROM Messages WHERE Date BETWEEN (:start) AND (:end)")
     fun exportLog(start: Long?, end: Long?): Cursor
 
     @Update

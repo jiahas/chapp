@@ -37,29 +37,15 @@
             />
     </RelativeLayout>
 
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/logRecyclerView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/LayoutContainer1"
+        tools:itemCount="10"
+        tools:listitem="@layout/sent_layout"
         android:layout_above="@id/LayoutContainer2"
-        >
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:src="@drawable/progress_stone"
-            android:visibility="gone"
-            >
-
-        </ImageView>
-        <androidx.recyclerview.widget.RecyclerView
-            tools:listitem="@layout/sent_layout"
-            tools:itemCount="10"
-            android:id="@+id/logRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-    </FrameLayout>
+        android:layout_below="@id/LayoutContainer1"
+        />
 
 
 
