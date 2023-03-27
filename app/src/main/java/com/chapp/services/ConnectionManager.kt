@@ -31,7 +31,7 @@ object ConnectionManager {
 
     private var listeners: MutableSet<WeakReference<ConnectionEventListener>> = mutableSetOf()
 
-    val deviceGattMap = ConcurrentHashMap<BluetoothDevice, BluetoothGatt>()
+    var deviceGattMap = ConcurrentHashMap<BluetoothDevice, BluetoothGatt>()
     private val operationQueue = ConcurrentLinkedQueue<BleOperationType>()
     private var pendingOperation: BleOperationType? = null
     lateinit var application: Application
@@ -324,7 +324,7 @@ object ConnectionManager {
             is MtuRequest -> with(operation) {
                 gatt.requestMtu(mtu)
             }
-            is Connect -> TODO()
+            else -> {signalEndOfOperation()}
         }
     }
 
