@@ -30,7 +30,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.chapp.databinding.ActivityMainBinding
 import com.chapp.services.*
+import com.chapp.services.ConnectionManager.connect
 import com.chapp.services.ConnectionManager.deviceGattMap
+import com.chapp.services.ConnectionManager.listenToBondStateChanges
 import com.chapp.services.ConnectionManager.registerListener
 import com.chapp.services.ConnectionManager.teardownConnection
 import com.chapp.ui.chat.ChatFragment
@@ -91,17 +93,19 @@ class MainActivity : AppCompatActivity(),
     private val scanResults: MutableList<ScanResult> = mutableListOf()
 
     val scanResultAdapter: ScanResultAdapter by lazy {
-        ScanResultAdapter(this, bluetoothManager, scanResults) { result ->
-            if (isScanning) {
-                stopBleScan()
+        ScanResultAdapter(this, bluetoothManager, scanResults) { result, state ->
+            if (state) {
+                if (isScanning) {
+                    stopBleScan()
                 }
-            with(result.device){
-                Log.w("ScanResultAdapter", "Connecting to $address")
-                ConnectionManager.connect(this, this@MainActivity)
-                ConnectionManager.listenToBondStateChanges( this@MainActivity)
+                with(result.device) {
+                    Log.w("ScanResultAdapter", "Connecting to $address")
+                    connect(this, this@MainActivity)
+                    listenToBondStateChanges(this@MainActivity)
                 }
-            }
+            } else { teardownConnection(result.device) }
         }
+    }
 
     /*******************************************
      * Activity function overrides

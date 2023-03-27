@@ -14,7 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.chapp.services.ConnectionManager
 
-
+const val CONNECT = true
+const val DISCONNECT = false
 var mExpandedPosition = -1
 
 @SuppressLint("MissingPermission")
@@ -22,7 +23,7 @@ class ScanResultAdapter (
     val context: Context,
     val bluetoothManager: BluetoothManager,
     private val items: List<ScanResult>,
-    private val onClickListener: ((device: ScanResult) -> Unit),
+    private val onClickListener: ((device: ScanResult, state: Boolean) -> Unit),
 
 ) : RecyclerView.Adapter<ScanResultAdapter.ViewHolder>() {
 
@@ -78,14 +79,14 @@ class ScanResultAdapter (
 
     inner class ViewHolder(
         view: View,
-        private val onClickListener: ((device: ScanResult) -> Unit)
+        private val onClickListener: ((device: ScanResult, state: Boolean) -> Unit)
     ) : RecyclerView.ViewHolder(view) {
 
         val button = itemView.findViewById<Button>(R.id.connect_button)
         val device = itemView.findViewById<TextView>(R.id.device_name)
         val mac = itemView.findViewById<TextView>(R.id.mac_address)
         val rssi = itemView.findViewById<TextView>(R.id.signal_strength)
-        val disconnect = itemView.findViewById<TextView>(R.id.disconnect)
+        val disconnect = itemView.findViewById<Button>(R.id.disconnect)
 
         @SuppressLint("SetTextI18n")
         fun bind(result: ScanResult) {
@@ -93,8 +94,8 @@ class ScanResultAdapter (
             device.text = result.device.name ?: "Unnamed"
             mac.text = result.device.address
             rssi.text = "${result.rssi} dBm"
-            button.setOnClickListener { onClickListener.invoke(result)}
-            disconnect.setOnClickListener { ConnectionManager.teardownConnection(result.device)}
+            button.setOnClickListener { onClickListener.invoke(result, CONNECT)}
+            disconnect.setOnClickListener { onClickListener.invoke(result,DISCONNECT)}
 
             return
 
